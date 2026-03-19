@@ -1,52 +1,52 @@
-import type { Document, User } from "./models.js";
+import type { Leak, User } from "./models.js";
 
 export const users: User[] = [
   {
     id: "u1",
     username: "Eduardo1",
     password: "Eduardo1",
-    clearance: "TOP_SECRET",
-    categories: ["NUCLEAR", "NATO", "FINANCE"]
+    clearance: "ULTIMATE_FINALE",
+    categories: ["SPACE_OPERA", "MYSTERY_TOWN", "COOKING_ARENA"]
   },
   {
     id: "u2",
     username: "Eduardo2",
     password: "Eduardo2",
-    clearance: "SECRET",
-    categories: ["NATO"]
+    clearance: "SPOILER",
+    categories: ["SPACE_OPERA"]
   },
   {
     id: "u3",
     username: "Eduardo3",
     password: "Eduardo3",
-    clearance: "CONFIDENTIAL",
-    categories: ["FINANCE"]
+    clearance: "BACKSTAGE",
+    categories: ["COOKING_ARENA"]
   }
 ];
 
-export const documents: Document[] = [
+export const leaks: Leak[] = [
   {
-    id: "d1",
-    title: "Relatorio Publico",
-    content: "Dados abertos para todos os usuarios.",
-    classification: "PUBLIC",
+    id: "l1",
+    title: "Teaser Oficial da Temporada",
+    content: "Data de estreia e poster publico.",
+    spoilerLevel: "PUBLIC_FEED",
     categories: [],
     ownerId: "u1"
   },
   {
-    id: "d2",
-    title: "Plano NATO",
-    content: "Plano de operacao restrito a categoria NATO.",
-    classification: "SECRET",
-    categories: ["NATO"],
+    id: "l2",
+    title: "Reviravolta Episodio 7",
+    content: "Personagem principal troca de lado no final.",
+    spoilerLevel: "SPOILER",
+    categories: ["SPACE_OPERA"],
     ownerId: "u2"
   },
   {
-    id: "d3",
-    title: "Orcamento Critico",
-    content: "Projecoes financeiras sensiveis.",
-    classification: "CONFIDENTIAL",
-    categories: ["FINANCE"],
+    id: "l3",
+    title: "Eliminacao surpresa no reality",
+    content: "Participante favorito e eliminado antes da final.",
+    spoilerLevel: "BACKSTAGE",
+    categories: ["COOKING_ARENA"],
     ownerId: "u3"
   }
 ];
@@ -59,6 +59,6 @@ export function findUserById(id: string) {
   return users.find((u) => u.id === id);
 }
 
-export function findDocumentById(id: string) {
-  return documents.find((d) => d.id === id);
+export function findLeakById(id: string) {
+  return leaks.find((d) => d.id === id);
 }

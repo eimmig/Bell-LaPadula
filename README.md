@@ -1,9 +1,9 @@
-# Sistema de Controle de Acesso com Hono (Bell-LaPadula)
+# Sistema de Controle de Spoilers com Hono (Bell-LaPadula)
 
-API simples em `Hono + TypeScript` com:
+API simples em `Hono + TypeScript` com tema de plataforma de streaming:
 
 - Autenticacao por usuario/senha e token JWT
-- Politicas de acesso Bell-LaPadula
+- Politicas de acesso Bell-LaPadula aplicadas a vazamentos de spoilers
 - Logs de auditoria em arquivo (`logs/audit.log`)
 
 ## Requisitos
@@ -34,9 +34,9 @@ Servidor padrao: `http://localhost:3000`
 
 ## Usuarios de exemplo
 
-- `alice / alice123` (`TOP_SECRET`, categorias: `NUCLEAR`, `NATO`, `FINANCE`)
-- `bob / bob123` (`SECRET`, categoria: `NATO`)
-- `carol / carol123` (`CONFIDENTIAL`, categoria: `FINANCE`)
+- `Eduardo1 / Eduardo1` (`ULTIMATE_FINALE`, categorias: `SPACE_OPERA`, `MYSTERY_TOWN`, `COOKING_ARENA`)
+- `Eduardo2 / Eduardo2` (`SPOILER`, categoria: `SPACE_OPERA`)
+- `Eduardo3 / Eduardo3` (`BACKSTAGE`, categoria: `COOKING_ARENA`)
 
 ## Regras Bell-LaPadula aplicadas
 
@@ -49,10 +49,10 @@ Servidor padrao: `http://localhost:3000`
 ## Endpoints
 
 - `POST /auth/login`
-- `GET /documents`
-- `GET /documents/:id`
-- `POST /documents`
-- `GET /audit/logs` (somente `TOP_SECRET`)
+- `GET /leaks`
+- `GET /leaks/:id`
+- `POST /leaks`
+- `GET /audit/logs` (somente `ULTIMATE_FINALE`)
 
 ## Exemplos de uso
 
@@ -61,35 +61,35 @@ Servidor padrao: `http://localhost:3000`
 ```bash
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"bob","password":"bob123"}'
+  -d '{"username":"Eduardo2","password":"Eduardo2"}'
 ```
 
 ### 2) Listar documentos permitidos
 
 ```bash
-curl http://localhost:3000/documents \
+curl http://localhost:3000/leaks \
   -H "Authorization: Bearer SEU_TOKEN"
 ```
 
 ### 3) Ler um documento
 
 ```bash
-curl http://localhost:3000/documents/d2 \
+curl http://localhost:3000/leaks/l2 \
   -H "Authorization: Bearer SEU_TOKEN"
 ```
 
-### 4) Criar documento (sujeito a Bell-LaPadula)
+### 4) Criar vazamento (sujeito a Bell-LaPadula)
 
 ```bash
-curl -X POST http://localhost:3000/documents \
+curl -X POST http://localhost:3000/leaks \
   -H "Authorization: Bearer SEU_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "id":"d9",
-    "title":"Novo documento",
-    "content":"conteudo",
-    "classification":"SECRET",
-    "categories":["NATO"]
+    "id":"l9",
+    "title":"Spoiler episodio final",
+    "content":"revelacao do ultimo episodio",
+    "spoilerLevel":"SPOILER",
+    "categories":["SPACE_OPERA"]
   }'
 ```
 
@@ -102,9 +102,9 @@ Formato base:
 ```json
 {
   "timestamp": "2026-03-18T20:10:00.000Z",
-  "actor": "bob",
-  "action": "READ_DOCUMENT",
-  "target": "d2",
+  "actor": "Eduardo2",
+  "action": "READ_LEAK",
+  "target": "l2",
   "outcome": "ALLOW",
   "reason": "..."
 }

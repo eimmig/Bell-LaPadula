@@ -3,8 +3,8 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { authMiddleware, issueToken } from "./auth.js";
 import { writeAuditLog } from "./audit.js";
-import { documents, findDocumentById, findUserByUsername } from "./data.js";
-import type { Document, User } from "./models.js";
+import { findLeakById, findUserByUsername, leaks } from "./data.js";
+import type { Leak, User } from "./models.js";
 import { canRead, canWrite, levelFromString } from "./security.js";
 
 type AppBindings = {
@@ -20,23 +20,23 @@ const loginSchema = z.object({
   password: z.string().min(1)
 });
 
-const createDocumentSchema = z.object({
+const createLeakSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   content: z.string().min(1),
-  classification: z.enum(["PUBLIC", "CONFIDENTIAL", "SECRET", "TOP_SECRET"]),
+  spoilerLevel: z.enum(["PUBLIC_FEED", "BACKSTAGE", "SPOILER", "ULTIMATE_FINALE"]),
   categories: z.array(z.string().min(1)).default([])
 });
 
 app.get("/", (c) => {
   return c.json({
-    name: "Simple Access Control with Hono",
+    name: "Spoiler Access Control with Hono",
     model: "Bell-LaPadula",
     endpoints: [
       "POST /auth/login",
-      "GET /documents",
-      "GET /documents/:id",
-      "POST /documents",
+      "GET /leaks",
+      "GET /leaks/:id",
+      "POST /leaks",
       "GET /audit/logs"
     ]
   });
@@ -90,52 +90,52 @@ app.post("/auth/login", async (c) => {
   });
 });
 
-app.use("/documents/*", authMiddleware);
+app.use("/leaks/*", authMiddleware);
 app.use("/audit/*", authMiddleware);
 
-app.get("/documents", async (c) => {
+app.get("/leaks", async (c) => {
   const user = c.get("user");
-  const readable = documents.filter((doc) => canRead(user, doc));
+  const readable = leaks.filter((leak) => canRead(user, leak));
 
   await writeAuditLog({
     timestamp: new Date().toISOString(),
     actor: user.username,
-    action: "LIST_DOCUMENTS",
+    action: "LIST_LEAKS",
     outcome: "ALLOW"
   });
 
   return c.json({
-    documents: readable.map((d) => ({
+    leaks: readable.map((d) => ({
       id: d.id,
       title: d.title,
-      classification: d.classification,
+      spoilerLevel: d.spoilerLevel,
       categories: d.categories
     }))
   });
 });
 
-app.get("/documents/:id", async (c) => {
+app.get("/leaks/:id", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
-  const doc = findDocumentById(id);
+  const leak = findLeakById(id);
 
-  if (!doc) {
+  if (!leak) {
     await writeAuditLog({
       timestamp: new Date().toISOString(),
       actor: user.username,
-      action: "READ_DOCUMENT",
+      action: "READ_LEAK",
       target: id,
       outcome: "DENY",
-      reason: "Documento nao encontrado"
+      reason: "Vazamento nao encontrado"
     });
-    return c.json({ error: "Documento nao encontrado." }, 404);
+    return c.json({ error: "Vazamento nao encontrado." }, 404);
   }
 
-  if (!canRead(user, doc)) {
+  if (!canRead(user, leak)) {
     await writeAuditLog({
       timestamp: new Date().toISOString(),
       actor: user.username,
-      action: "READ_DOCUMENT",
+      action: "READ_LEAK",
       target: id,
       outcome: "DENY",
       reason: "Violacao Bell-LaPadula (no read up / categorias)"
@@ -146,92 +146,92 @@ app.get("/documents/:id", async (c) => {
   await writeAuditLog({
     timestamp: new Date().toISOString(),
     actor: user.username,
-    action: "READ_DOCUMENT",
+    action: "READ_LEAK",
     target: id,
     outcome: "ALLOW"
   });
 
-  return c.json({ document: doc });
+  return c.json({ leak });
 });
 
-app.post("/documents", async (c) => {
+app.post("/leaks", async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => null);
-  const parsed = createDocumentSchema.safeParse(body);
+  const parsed = createLeakSchema.safeParse(body);
 
   if (!parsed.success) {
     await writeAuditLog({
       timestamp: new Date().toISOString(),
       actor: user.username,
-      action: "CREATE_DOCUMENT",
+      action: "CREATE_LEAK",
       outcome: "DENY",
       reason: "Payload invalido"
     });
     return c.json({ error: "Payload invalido." }, 400);
   }
 
-  const exists = findDocumentById(parsed.data.id);
+  const exists = findLeakById(parsed.data.id);
   if (exists) {
     await writeAuditLog({
       timestamp: new Date().toISOString(),
       actor: user.username,
-      action: "CREATE_DOCUMENT",
+      action: "CREATE_LEAK",
       target: parsed.data.id,
       outcome: "DENY",
       reason: "ID ja existente"
     });
-    return c.json({ error: "Ja existe documento com este ID." }, 409);
+    return c.json({ error: "Ja existe vazamento com este ID." }, 409);
   }
 
-  const docLevel = levelFromString(parsed.data.classification);
-  if (!docLevel) {
-    return c.json({ error: "Nivel de classificacao invalido." }, 400);
+  const leakLevel = levelFromString(parsed.data.spoilerLevel);
+  if (!leakLevel) {
+    return c.json({ error: "Nivel de spoiler invalido." }, 400);
   }
 
-  const newDoc: Document = {
+  const newLeak: Leak = {
     id: parsed.data.id,
     title: parsed.data.title,
     content: parsed.data.content,
-    classification: docLevel,
+    spoilerLevel: leakLevel,
     categories: parsed.data.categories,
     ownerId: user.id
   };
 
-  if (!canWrite(user, newDoc)) {
+  if (!canWrite(user, newLeak)) {
     await writeAuditLog({
       timestamp: new Date().toISOString(),
       actor: user.username,
-      action: "CREATE_DOCUMENT",
-      target: newDoc.id,
+      action: "CREATE_LEAK",
+      target: newLeak.id,
       outcome: "DENY",
       reason: "Violacao Bell-LaPadula (no write down / categorias)"
     });
     return c.json({ error: "A escrita viola Bell-LaPadula." }, 403);
   }
 
-  documents.push(newDoc);
+  leaks.push(newLeak);
 
   await writeAuditLog({
     timestamp: new Date().toISOString(),
     actor: user.username,
-    action: "CREATE_DOCUMENT",
-    target: newDoc.id,
+    action: "CREATE_LEAK",
+    target: newLeak.id,
     outcome: "ALLOW"
   });
 
-  return c.json({ document: newDoc }, 201);
+  return c.json({ leak: newLeak }, 201);
 });
 
 app.get("/audit/logs", async (c) => {
   const user = c.get("user");
 
-  if (user.clearance !== "TOP_SECRET") {
+  if (user.clearance !== "ULTIMATE_FINALE") {
     await writeAuditLog({
       timestamp: new Date().toISOString(),
       actor: user.username,
       action: "READ_AUDIT_LOGS",
       outcome: "DENY",
-      reason: "Somente TOP_SECRET pode visualizar auditoria"
+      reason: "Somente ULTIMATE_FINALE pode visualizar auditoria"
     });
     return c.json({ error: "Acesso negado." }, 403);
   }

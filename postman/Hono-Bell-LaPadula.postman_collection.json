@@ -15,12 +15,12 @@
       "value": ""
     },
     {
-      "key": "docId",
-      "value": "d2"
+      "key": "leakId",
+      "value": "l2"
     },
     {
-      "key": "newDocId",
-      "value": "d900"
+      "key": "newLeakId",
+      "value": "l900"
     }
   ],
   "item": [
@@ -108,7 +108,7 @@
           "response": []
         },
         {
-          "name": "POST /auth/login (Eduardo1 TOP_SECRET)",
+          "name": "POST /auth/login (Eduardo1 ULTIMATE_FINALE)",
           "event": [
             {
               "listen": "test",
@@ -152,10 +152,10 @@
       ]
     },
     {
-      "name": "Documents",
+      "name": "Leaks",
       "item": [
         {
-          "name": "GET /documents (permitidos para token atual)",
+          "name": "GET /leaks (permitidos para token atual)",
           "request": {
             "method": "GET",
             "header": [
@@ -165,12 +165,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/documents",
+              "raw": "{{baseUrl}}/leaks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "documents"
+                "leaks"
               ]
             }
           },
@@ -190,7 +190,7 @@
           ]
         },
         {
-          "name": "GET /documents/d2 (Eduardo2 deve ALLOW)",
+          "name": "GET /leaks/l2 (Eduardo2 deve ALLOW)",
           "request": {
             "method": "GET",
             "header": [
@@ -200,13 +200,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/documents/d2",
+              "raw": "{{baseUrl}}/leaks/l2",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "documents",
-                "d2"
+                "leaks",
+                "l2"
               ]
             }
           },
@@ -226,7 +226,7 @@
           ]
         },
         {
-          "name": "GET /documents/d3 (Eduardo2 deve DENY 403)",
+          "name": "GET /leaks/l3 (Eduardo2 deve DENY 403)",
           "request": {
             "method": "GET",
             "header": [
@@ -236,13 +236,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/documents/d3",
+              "raw": "{{baseUrl}}/leaks/l3",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "documents",
-                "d3"
+                "leaks",
+                "l3"
               ]
             }
           },
@@ -262,7 +262,7 @@
           ]
         },
         {
-          "name": "POST /documents (Eduardo2 write-down deve DENY 403)",
+          "name": "POST /leaks (Eduardo2 write-down deve DENY 403)",
           "request": {
             "method": "POST",
             "header": [
@@ -277,15 +277,15 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": \"{{newDocId}}\",\n  \"title\": \"Teste write down\",\n  \"content\": \"tentativa de escrita em PUBLIC\",\n  \"classification\": \"PUBLIC\",\n  \"categories\": []\n}"
+              "raw": "{\n  \"id\": \"{{newLeakId}}\",\n  \"title\": \"Vazamento no feed publico\",\n  \"content\": \"tentativa de publicar spoiler pesado no feed\",\n  \"spoilerLevel\": \"PUBLIC_FEED\",\n  \"categories\": []\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/documents",
+              "raw": "{{baseUrl}}/leaks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "documents"
+                "leaks"
               ]
             }
           },
@@ -305,7 +305,7 @@
           ]
         },
         {
-          "name": "POST /documents (Eduardo1 TOP_SECRET em TOP_SECRET deve ALLOW)",
+          "name": "POST /leaks (Eduardo1 ULTIMATE_FINALE em ULTIMATE_FINALE deve ALLOW)",
           "request": {
             "method": "POST",
             "header": [
@@ -320,15 +320,15 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": \"{{newDocId}}\",\n  \"title\": \"Documento sensivel\",\n  \"content\": \"conteudo de alto nivel\",\n  \"classification\": \"TOP_SECRET\",\n  \"categories\": [\"NATO\", \"FINANCE\", \"NUCLEAR\"]\n}"
+              "raw": "{\n  \"id\": \"{{newLeakId}}\",\n  \"title\": \"Final da temporada vazado\",\n  \"content\": \"identidade do vilao final e revelada\",\n  \"spoilerLevel\": \"ULTIMATE_FINALE\",\n  \"categories\": [\"SPACE_OPERA\", \"MYSTERY_TOWN\", \"COOKING_ARENA\"]\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/documents",
+              "raw": "{{baseUrl}}/leaks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "documents"
+                "leaks"
               ]
             }
           },

@@ -1,4 +1,4 @@
-export const LEVELS = ["PUBLIC", "CONFIDENTIAL", "SECRET", "TOP_SECRET"] as const;
+export const LEVELS = ["PUBLIC_FEED", "BACKSTAGE", "SPOILER", "ULTIMATE_FINALE"] as const;
 
 export type SecurityLevel = (typeof LEVELS)[number];
 
@@ -10,11 +10,11 @@ export interface User {
   categories: string[];
 }
 
-export interface Document {
+export interface Leak {
   id: string;
   title: string;
   content: string;
-  classification: SecurityLevel;
+  spoilerLevel: SecurityLevel;
   categories: string[];
   ownerId: string;
 }
