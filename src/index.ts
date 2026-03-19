@@ -59,7 +59,7 @@ app.post("/auth/login", async (c) => {
   const { username, password } = parsed.data;
   const user = findUserByUsername(username);
 
-  if (!user || user.password !== password) {
+  if (user?.password !== password) {
     await writeAuditLog({
       timestamp: new Date().toISOString(),
       actor: username,
